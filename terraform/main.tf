@@ -22,15 +22,7 @@ resource "azurerm_key_vault" "main" {
   resource_group_name = azurerm_resource_group.main.name
   sku_name            = "standard"
   tenant_id           = data.azurerm_client_config.current.tenant_id
-
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-
-    secret_permissions = [
-      "Get", "List", "Set", "Delete"
-    ]
-  }
+  enable_rbac_authorization = true
 }
 
 resource "azurerm_databricks_workspace" "main" {
@@ -96,6 +88,12 @@ resource "azurerm_data_factory" "main" {
 
 
 # --- PERMISSIONS ---
+
+resource "azurerm_role_assignment" "user_to_kv_admin" {
+  scope                = azurerm_key_vault.main.id
+  role_definition_name = "Key Vault Administrator"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
 
 resource "azurerm_role_assignment" "function_to_adls" {
   scope                = azurerm_storage_account.data_lake.id
