@@ -1,7 +1,7 @@
 import logging
 import os
 import requests
-from datetime import datetime
+import datetime
 import azure.functions as func
 
 from azure.keyvault.secrets import SecretClient
