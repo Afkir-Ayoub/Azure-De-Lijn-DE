@@ -1,5 +1,7 @@
 data "azurerm_client_config" "current" {} # info about current Azure user
 
+# --- RESOURCES ---
+
 resource "azurerm_resource_group" "main" {
   name     = var.resource_group_name
   location = var.location
@@ -73,4 +75,19 @@ resource "azurerm_linux_function_app" "main" {
   identity {
     type = "SystemAssigned" # enables Managed Identity to give Function App its own identity in Azure AD
   }
+}
+
+
+# --- PERMISSIONS ---
+
+resource "azurerm_role_assignment" "function_to_adls" {
+  scope                = azurerm_storage_account.data_lake.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_linux_function_app.main.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "function_to_kv" {
+  scope                = azurerm_key_vault.main.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_linux_function_app.main.identity[0].principal_id
 }
