@@ -60,7 +60,6 @@ jobs:
         run: terraform init
         working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
 
-      # Step 5: Run 'terraform apply'
       - name: Terraform Apply
         run: terraform apply -auto-approve # Automatically approve the plan
         working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
@@ -84,6 +83,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
         working-directory: ./src/real-time-ingestion
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure Function App
         uses: azure/functions-action@v1
