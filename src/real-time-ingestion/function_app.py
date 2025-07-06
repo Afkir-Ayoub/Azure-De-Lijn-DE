@@ -26,9 +26,9 @@ blob_service_client = BlobServiceClient(
 app = func.FunctionApp()
 
 
-# The schedule is a CRON expression for "every 15 minutes".
+# The schedule is a CRON expression for "every 2 minutes".
 @app.schedule(
-    schedule="0 */15 * * * *", arg_name="myTimer", run_on_startup=True, use_monitor=False
+    schedule="0 */2 * * * *", arg_name="myTimer", run_on_startup=True, use_monitor=False
 )
 def real_time_ingestor(myTimer: func.TimerRequest) -> None:
 
