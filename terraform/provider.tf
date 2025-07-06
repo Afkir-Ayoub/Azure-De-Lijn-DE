@@ -1,6 +1,6 @@
 terraform {
   backend "azurerm" {
-    resource_group_name  = "Azure-De-Lijn-DE"
+    resource_group_name  = "De-Lijn-platform"
     storage_account_name = "delijntfstate"
     container_name       = "tfstate"
     key                  = "prod.terraform.tfstate" # state file name

@@ -42,7 +42,7 @@ resource "azurerm_storage_account" "function_app" {
 }
 
 resource "azurerm_service_plan" "main" {
-  name                = "plan-${var.prefix}-platform"
+  name                = "plan-${var.prefix}-main"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   os_type             = "Linux"
