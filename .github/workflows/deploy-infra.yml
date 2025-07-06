@@ -73,17 +73,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Setup Python 3.12
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-        working-directory: ./src/real-time-ingestion
-
       - name: Login to Azure
         uses: azure/login@v1
         with:
@@ -94,3 +83,4 @@ jobs:
         with:
           app-name: 'func-dl-ingestion'
           package: './src/real-time-ingestion'
+          python-version: '3.13'
