@@ -75,6 +75,23 @@ resource "azurerm_linux_function_app" "main" {
   identity {
     type = "SystemAssigned" # enables Managed Identity to give Function App its own identity in Azure AD
   }
+
+  app_settings = {
+    "KEY_VAULT_URL"          = azurerm_key_vault.main.vault_uri
+    "API_KEY_SECRET_NAME"    = "dl-rt-api-key"                                 
+    "STORAGE_ACCOUNT_URL"    = "https://stdldatalake.blob.core.windows.net"
+    "STORAGE_CONTAINER_NAME" = "bronze"
+  }
+}
+
+resource "azurerm_data_factory" "main" {
+  name                = "adf-${var.prefix}-main"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  
+  identity {
+    type = "SystemAssigned"
+  }
 }
 
 
@@ -90,4 +107,10 @@ resource "azurerm_role_assignment" "function_to_kv" {
   scope                = azurerm_key_vault.main.id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_linux_function_app.main.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "adf_to_adls" {
+  scope                = azurerm_storage_account.data_lake.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_data_factory.main.identity[0].principal_id
 }
