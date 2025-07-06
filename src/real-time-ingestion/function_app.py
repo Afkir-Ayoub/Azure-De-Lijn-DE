@@ -32,7 +32,7 @@ app = func.FunctionApp()
 )
 def real_time_ingestor(myTimer: func.TimerRequest) -> None:
 
-    utc_timestamp = datetime.now(datetime.timezone.utc).isoformat()
+    utc_timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
     if myTimer.past_due:
         logging.info("The timer is past due!")
 
@@ -58,7 +58,7 @@ def real_time_ingestor(myTimer: func.TimerRequest) -> None:
         logging.info("Successfully received data from API.")
 
         # 3. Save the Raw Data to ADLS
-        now = datetime.now(datetime.timezone.utc)
+        now = datetime.datetime.now(datetime.timezone.utc)
         file_name = f"raw/{now.year}/{now.month:02d}/{now.day:02d}/{now.strftime('%Y-%m-%dT%H-%M-%S')}.json"
 
         blob_client = blob_service_client.get_blob_client(
