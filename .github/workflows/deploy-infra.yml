@@ -8,7 +8,8 @@ on:
 
 env:
   TERRAFORM_WORKING_DIR: './terraform'
- 
+  TF_VAR_delijn_api_key: ${{ secrets.DELIJN_API_KEY }}
+
 jobs:
   terraform_plan:
     name: 'Terraform Plan'
