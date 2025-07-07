@@ -106,3 +106,9 @@ resource "azurerm_role_assignment" "adf_to_adls" {
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_data_factory.main.identity[0].principal_id
 }
+
+resource "azurerm_role_assignment" "databricks_to_adls" {
+  scope                = azurerm_storage_account.data_lake.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_databricks_workspace.main.identity[0].principal_id
+}
