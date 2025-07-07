@@ -15,3 +15,9 @@ variable "resource_group_name" {
   type        = string
   default     = "rg-dl-main"
 }
+
+variable "delijn_api_key" {
+  description = "The primary API key for De Lijn Realtime API."
+  type        = string
+  sensitive   = true
+}

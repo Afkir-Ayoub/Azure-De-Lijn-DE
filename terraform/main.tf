@@ -16,15 +16,6 @@ resource "azurerm_storage_account" "data_lake" {
   is_hns_enabled           = true
 }
 
-resource "azurerm_key_vault" "main" {
-  name                = "kv-${var.prefix}-main"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  sku_name            = "standard"
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-  enable_rbac_authorization = true
-}
-
 resource "azurerm_databricks_workspace" "main" {
   name                        = "dbw-${var.prefix}-main"
   resource_group_name         = azurerm_resource_group.main.name
@@ -69,8 +60,7 @@ resource "azurerm_linux_function_app" "main" {
   }
 
   app_settings = {
-    "KEY_VAULT_URL"          = azurerm_key_vault.main.vault_uri
-    "API_KEY_SECRET_NAME"    = "dl-rt-api-key"                                 
+    "DELIJN_API_KEY" = var.delijn_api_key # Hardcoded due to issue with Azure subscription limits on Education accounts
     "STORAGE_ACCOUNT_URL"    = "https://stdldatalake.blob.core.windows.net"
     "STORAGE_CONTAINER_NAME" = "bronze"
   }
@@ -80,7 +70,7 @@ resource "azurerm_data_factory" "main" {
   name                = "adf-${var.prefix}-main"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  
+
   identity {
     type = "SystemAssigned"
   }
@@ -89,21 +79,10 @@ resource "azurerm_data_factory" "main" {
 
 # --- PERMISSIONS ---
 
-resource "azurerm_role_assignment" "user_to_kv_admin" {
-  scope                = azurerm_key_vault.main.id
-  role_definition_name = "Key Vault Administrator"
-  principal_id         = data.azurerm_client_config.current.object_id
-}
 
 resource "azurerm_role_assignment" "function_to_adls" {
   scope                = azurerm_storage_account.data_lake.id
   role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_linux_function_app.main.identity[0].principal_id
-}
-
-resource "azurerm_role_assignment" "function_to_kv" {
-  scope                = azurerm_key_vault.main.id
-  role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_linux_function_app.main.identity[0].principal_id
 }
 
