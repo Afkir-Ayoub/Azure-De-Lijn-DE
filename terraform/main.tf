@@ -16,6 +16,21 @@ resource "azurerm_storage_account" "data_lake" {
   is_hns_enabled           = true
 }
 
+resource "azurerm_storage_container" "bronze" {
+  name                  = "bronze"
+  storage_account_id  = azurerm_storage_account.data_lake.id
+}
+
+resource "azurerm_storage_container" "silver" {
+  name                  = "silver"
+  storage_account_id  = azurerm_storage_account.data_lake.id
+}
+
+resource "azurerm_storage_container" "gold" {
+  name                  = "gold"
+  storage_account_id  = azurerm_storage_account.data_lake.id
+}
+
 resource "azurerm_databricks_workspace" "main" {
   name                        = "dbw-${var.prefix}-main"
   resource_group_name         = azurerm_resource_group.main.name
