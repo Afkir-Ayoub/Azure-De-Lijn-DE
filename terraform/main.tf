@@ -16,19 +16,10 @@ resource "azurerm_storage_account" "data_lake" {
   is_hns_enabled           = true
 }
 
-resource "azurerm_storage_container" "bronze" {
-  name                  = "bronze"
-  storage_account_name  = azurerm_storage_account.data_lake.name
-}
-
-resource "azurerm_storage_container" "silver" {
-  name                  = "silver"
-  storage_account_name  = azurerm_storage_account.data_lake.name
-}
-
-resource "azurerm_storage_container" "gold" {
-  name                  = "gold"
-  storage_account_name  = azurerm_storage_account.data_lake.name
+resource "azurerm_storage_container" "datalake_containers" {
+  for_each             = toset(["bronze", "silver", "gold"])
+  name                 = each.key
+  storage_account_name = azurerm_storage_account.data_lake.name
 }
 
 resource "azurerm_databricks_workspace" "main" {
@@ -59,9 +50,8 @@ resource "azurerm_linux_function_app" "main" {
   name                = "func-${var.prefix}-ingestion"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
-
+  storage_uses_managed_identity = true
   storage_account_name       = azurerm_storage_account.function_app.name
-  storage_account_access_key = azurerm_storage_account.function_app.primary_access_key
   service_plan_id            = azurerm_service_plan.main.id
 
   site_config {
@@ -75,8 +65,8 @@ resource "azurerm_linux_function_app" "main" {
   }
 
   app_settings = {
-    "DELIJN_API_KEY" = var.DELIJN_API_KEY # Hardcoded due to issue with Azure subscription limits on Education accounts
-    "STORAGE_ACCOUNT_URL"    = "https://stdldatalake.blob.core.windows.net"
+    "DELIJN_API_KEY"         = var.DELIJN_API_KEY # Hardcoded due to issue with Azure subscription limits on Education accounts
+    "STORAGE_ACCOUNT_URL"    = azurerm_storage_account.data_lake.primary_blob_endpoint
     "STORAGE_CONTAINER_NAME" = "bronze"
   }
 }
@@ -94,6 +84,17 @@ resource "azurerm_data_factory" "main" {
 
 # --- PERMISSIONS ---
 
+resource "azurerm_role_assignment" "function_to_storage_blob" {
+  scope                = azurerm_storage_account.function_app.id
+  role_definition_name = "Storage Blob Data Owner"
+  principal_id         = azurerm_linux_function_app.main.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "function_to_storage_queue" {
+  scope                = azurerm_storage_account.function_app.id
+  role_definition_name = "Storage Queue Data Contributor"
+  principal_id         = azurerm_linux_function_app.main.identity[0].principal_id
+}
 
 resource "azurerm_role_assignment" "function_to_adls" {
   scope                = azurerm_storage_account.data_lake.id
@@ -110,5 +111,5 @@ resource "azurerm_role_assignment" "adf_to_adls" {
 resource "azurerm_role_assignment" "databricks_to_adls" {
   scope                = azurerm_storage_account.data_lake.id
   role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_databricks_workspace.main.identity[0].principal_id
+  principal_id         = azurerm_databricks_workspace.main.storage_account_identity[0].principal_id
 }
