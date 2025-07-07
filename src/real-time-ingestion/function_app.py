@@ -2,6 +2,7 @@ import logging
 import os
 import requests
 import datetime
+import json
 import azure.functions as func
 
 from azure.identity import DefaultAzureCredential
@@ -46,6 +47,7 @@ def real_time_ingestor(myTimer: func.TimerRequest) -> None:
         response = requests.get(api_url, headers=headers)
         response.raise_for_status()
         data = response.json()
+        json_data_as_string = json.dumps(data, indent=4)
         logging.info("Successfully received data from API.")
 
         # 2. Save the Raw Data to ADLS
@@ -57,7 +59,7 @@ def real_time_ingestor(myTimer: func.TimerRequest) -> None:
         )
 
         logging.info(f"Uploading data to blob: {file_name}")
-        blob_client.upload_blob(data, blob_type="BlockBlob")
+        blob_client.upload_blob(json_data_as_string, blob_type="BlockBlob")
         logging.info("Upload complete.")
 
     except Exception as e:
