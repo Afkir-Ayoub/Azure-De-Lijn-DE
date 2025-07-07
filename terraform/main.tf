@@ -81,6 +81,15 @@ resource "azurerm_data_factory" "main" {
   }
 }
 
+resource "azurerm_databricks_access_connector" "uc_connector" {
+  name                = "ac-${var.prefix}-main"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
 
 # --- PERMISSIONS ---
 
@@ -108,8 +117,8 @@ resource "azurerm_role_assignment" "adf_to_adls" {
   principal_id         = azurerm_data_factory.main.identity[0].principal_id
 }
 
-resource "azurerm_role_assignment" "databricks_to_adls" {
+resource "azurerm_role_assignment" "uc_connector_to_adls" {
   scope                = azurerm_storage_account.data_lake.id
   role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_databricks_workspace.main.storage_account_identity[0].principal_id
+  principal_id         = azurerm_databricks_access_connector.uc_connector.identity[0].principal_id
 }
