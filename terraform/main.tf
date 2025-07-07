@@ -18,17 +18,17 @@ resource "azurerm_storage_account" "data_lake" {
 
 resource "azurerm_storage_container" "bronze" {
   name                  = "bronze"
-  storage_account_id  = azurerm_storage_account.data_lake.id
+  storage_account_name  = azurerm_storage_account.data_lake.name
 }
 
 resource "azurerm_storage_container" "silver" {
   name                  = "silver"
-  storage_account_id  = azurerm_storage_account.data_lake.id
+  storage_account_name  = azurerm_storage_account.data_lake.name
 }
 
 resource "azurerm_storage_container" "gold" {
   name                  = "gold"
-  storage_account_id  = azurerm_storage_account.data_lake.id
+  storage_account_name  = azurerm_storage_account.data_lake.name
 }
 
 resource "azurerm_databricks_workspace" "main" {
