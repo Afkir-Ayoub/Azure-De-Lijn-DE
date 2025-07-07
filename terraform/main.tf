@@ -60,7 +60,7 @@ resource "azurerm_linux_function_app" "main" {
   }
 
   app_settings = {
-    "DELIJN_API_KEY" = var.delijn_api_key # Hardcoded due to issue with Azure subscription limits on Education accounts
+    "DELIJN_API_KEY" = var.DELIJN_API_KEY # Hardcoded due to issue with Azure subscription limits on Education accounts
     "STORAGE_ACCOUNT_URL"    = "https://stdldatalake.blob.core.windows.net"
     "STORAGE_CONTAINER_NAME" = "bronze"
   }
